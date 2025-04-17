@@ -1,5 +1,5 @@
 {
-    "name": "hisorange/browser-detect",
+    "name": "orionhcs/HistoRangeBrowserDetect",
     "description": "Browser & Mobile detection package for Laravel.",
     "keywords": ["laravel", "user-agent", "browser", "mobile", "detect", "tablet", "user agent", "mobile", "tablet", "analyize", "hisorange"],
     "homepage": "https://github.com/hisorange/browser-detect",
