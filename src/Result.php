@@ -3,10 +3,12 @@
 namespace hisorange\BrowserDetect;
 
 use hisorange\BrowserDetect\Contracts\ResultInterface;
-use function get_object_vars;
 
 /**
- * Class Result
+ * The object is used for safely accessing the
+ * result of the parsing, this is necessary
+ * to allow us to change the implementaion
+ * behind the values.
  *
  * @package hisorange\BrowserDetect
  */
@@ -60,6 +62,16 @@ class Result implements ResultInterface
     /**
      * @var bool
      */
+    protected $isEdge = false;
+
+    /**
+     * @var boolean
+     */
+    protected $isInApp = false;
+
+    /**
+     * @var bool
+     */
     protected $isIE = false;
 
     /**
@@ -95,6 +107,11 @@ class Result implements ResultInterface
     /**
      * @var string
      */
+    protected $browserEngine = 'Unknown';
+
+    /**
+     * @var string
+     */
     protected $platformName = 'Unknown';
 
     /**
@@ -121,6 +138,26 @@ class Result implements ResultInterface
      * @var int
      */
     protected $platformVersionPatch = 0;
+
+    /**
+     * @var bool
+     */
+    protected $isWindows = false;
+
+    /**
+     * @var bool
+     */
+    protected $isLinux = false;
+
+    /**
+     * @var bool
+     */
+    protected $isMac = false;
+
+    /**
+     * @var bool
+     */
+    protected $isAndroid = false;
 
     /**
      * @var string
@@ -150,7 +187,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function userAgent()
+    public function userAgent(): string
     {
         return $this->userAgent;
     }
@@ -158,7 +195,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function isMobile()
+    public function isMobile(): bool
     {
         return $this->isMobile;
     }
@@ -166,7 +203,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function isTablet()
+    public function isTablet(): bool
     {
         return $this->isTablet;
     }
@@ -174,7 +211,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function isDesktop()
+    public function isDesktop(): bool
     {
         return $this->isDesktop;
     }
@@ -182,7 +219,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function isBot()
+    public function isBot(): bool
     {
         return $this->isBot;
     }
@@ -190,7 +227,20 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function isChrome()
+    public function deviceType(): string
+    {
+        foreach (['Mobile', 'Tablet', 'Desktop', 'Bot'] as $deviceType) {
+            if ($this->{'is' . $deviceType}()) {
+                return $deviceType;
+            }
+        }
+        return 'Unknown';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isChrome(): bool
     {
         return $this->isChrome;
     }
@@ -198,7 +248,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function isFirefox()
+    public function isFirefox(): bool
     {
         return $this->isFirefox;
     }
@@ -206,7 +256,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function isOpera()
+    public function isOpera(): bool
     {
         return $this->isOpera;
     }
@@ -214,15 +264,31 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function isSafari()
+    public function isSafari(): bool
     {
         return $this->isSafari;
     }
 
     /**
+     * @inheritDoc
+     */
+    public function isEdge(): bool
+    {
+        return $this->isEdge;
+    }
+
+    /**
      * @inheritdoc
      */
-    public function isIE()
+    public function isInApp(): bool
+    {
+        return $this->isInApp;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isIE(): bool
     {
         return $this->isIE;
     }
@@ -230,15 +296,15 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function isIEVersion($version, $operator = '=')
+    public function isIEVersion(int $version, string $operator = '='): bool
     {
-        return ($this->isIE && version_compare($version, $this->browserVersion(), $operator));
+        return ($this->isIE && version_compare($this->browserVersion, (string) $version, $operator));
     }
 
     /**
      * @inheritdoc
      */
-    public function browserVersion()
+    public function browserVersion(): string
     {
         return $this->browserVersion;
     }
@@ -246,7 +312,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function browserName()
+    public function browserName(): string
     {
         return $this->browserName;
     }
@@ -254,7 +320,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function browserFamily()
+    public function browserFamily(): string
     {
         return $this->browserFamily;
     }
@@ -262,31 +328,39 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function browserVersionMajor()
+    public function browserVersionMajor(): int
     {
-        return $this->browserVersionMajor;
+        return (int) $this->browserVersionMajor;
     }
 
     /**
      * @inheritdoc
      */
-    public function browserVersionMinor()
+    public function browserVersionMinor(): int
     {
-        return $this->browserVersionMinor;
+        return (int) $this->browserVersionMinor;
     }
 
     /**
      * @inheritdoc
      */
-    public function browserVersionPatch()
+    public function browserVersionPatch(): int
     {
-        return $this->browserVersionPatch;
+        return (int) $this->browserVersionPatch;
     }
 
     /**
      * @inheritdoc
      */
-    public function platformName()
+    public function browserEngine(): string
+    {
+        return $this->browserEngine;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function platformName(): string
     {
         return $this->platformName;
     }
@@ -294,7 +368,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function platformFamily()
+    public function platformFamily(): string
     {
         return $this->platformFamily;
     }
@@ -302,7 +376,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function platformVersion()
+    public function platformVersion(): string
     {
         return $this->platformVersion;
     }
@@ -310,31 +384,63 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function platformVersionMajor()
+    public function platformVersionMajor(): int
     {
-        return $this->platformVersionMajor;
+        return (int) $this->platformVersionMajor;
     }
 
     /**
      * @inheritdoc
      */
-    public function platformVersionMinor()
+    public function platformVersionMinor(): int
     {
-        return $this->platformVersionMinor;
+        return (int) $this->platformVersionMinor;
     }
 
     /**
      * @inheritdoc
      */
-    public function platformVersionPatch()
+    public function isWindows(): bool
     {
-        return $this->platformVersionPatch;
+        return $this->isWindows;
     }
 
     /**
      * @inheritdoc
      */
-    public function deviceFamily()
+    public function isLinux(): bool
+    {
+        return $this->isLinux;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isMac(): bool
+    {
+        return $this->isMac;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isAndroid(): bool
+    {
+        return $this->isAndroid;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function platformVersionPatch(): int
+    {
+        return (int) $this->platformVersionPatch;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function deviceFamily(): string
     {
         return $this->deviceFamily;
     }
@@ -342,7 +448,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function deviceModel()
+    public function deviceModel(): string
     {
         return $this->deviceModel;
     }
@@ -350,7 +456,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function mobileGrade()
+    public function mobileGrade(): string
     {
         return $this->mobileGrade;
     }
@@ -358,7 +464,7 @@ class Result implements ResultInterface
     /**
      * @inheritdoc
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return $this->toArray();
     }

@@ -1,5 +1,4 @@
 <?php
-
 namespace hisorange\BrowserDetect\Test;
 
 use Illuminate\Support\Facades\Blade;
@@ -12,19 +11,6 @@ use Illuminate\Support\Facades\Blade;
  */
 class BladeTest extends TestCase
 {
-    /**
-     * @throws \PHPUnit\Framework\SkippedTestError
-     * @throws \PHPUnit_Framework_SkippedTestError
-     */
-    public function setUp()
-    {
-        parent::setUp();
-
-        if (version_compare($this->app->version(), '5.5', '<')) {
-            $this->markTestSkipped('Cannot test if directives below laravel 5.5.');
-        }
-    }
-
     /**
      * @return array
      */
@@ -44,6 +30,34 @@ class BladeTest extends TestCase
         $expected = "<?php if (\Illuminate\Support\Facades\Blade::check('$directive')): ?> Ok <?php endif; ?>";
 
         $this->assertSame($expected, $actual);
+    }
+
+    /**
+     * @return array
+     */
+    public function directiveValuedProvider()
+    {
+        return [['mobile', false], ['desktop', true], ['tablet', false]];
+    }
+
+    /**
+     * @dataProvider directiveValuedProvider
+     * @param string $directive
+     * @covers       ::<protected>registerDirectives()
+     */
+    public function testCheckingDirectives($directive, $expected)
+    {
+        $this->assertSame($expected, Blade::check($directive));
+    }
+
+    /**
+     * @param string $directive
+     * @covers       ::<protected>registerDirectives()
+     */
+    public function testBrowserDirectiveResult()
+    {
+        $this->assertSame(true, Blade::check('browser', 'isDesktop'));
+        $this->assertSame(false, Blade::check('browser', 'ISMOBILE'));
     }
 
     /**

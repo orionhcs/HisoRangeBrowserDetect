@@ -4,22 +4,29 @@ namespace hisorange\BrowserDetect;
 
 use hisorange\BrowserDetect\Contracts\PayloadInterface;
 
+/**
+ * This class is passed down in the pipeline
+ * and each stage makes the changes on this
+ * state carrier object.
+ *
+ * @package hisorange\BrowserDetect
+ */
 class Payload implements PayloadInterface
 {
     /**
      * @var string
      */
-    private $agent;
+    protected $agent;
 
     /**
      * @var array
      */
-    private $store = [];
+    protected $store = [];
 
     /**
      * @inheritdoc
      */
-    public function __construct($agent)
+    public function __construct(string $agent)
     {
         $this->agent = $agent;
     }
@@ -27,15 +34,15 @@ class Payload implements PayloadInterface
     /**
      * @inheritdoc
      */
-    public function getAgent()
+    public function getAgent(): string
     {
-       return $this->agent;
+        return $this->agent;
     }
 
     /**
      * @inheritdoc
      */
-    public function getValue($key)
+    public function getValue(string $key)
     {
         if (array_key_exists($key, $this->store)) {
             return $this->store[$key];
@@ -47,7 +54,7 @@ class Payload implements PayloadInterface
     /**
      * @inheritdoc
      */
-    public function setValue($key, $value)
+    public function setValue(string $key, $value): void
     {
         if ($value !== null) {
             $this->store[$key] = $value;
@@ -57,10 +64,13 @@ class Payload implements PayloadInterface
     /**
      * @inheritdoc
      */
-    public function toArray()
+    public function toArray(): array
     {
-        return array_merge($this->store, [
+        return array_merge(
+            $this->store,
+            [
             'userAgent' => $this->agent,
-        ]);
+            ]
+        );
     }
 }

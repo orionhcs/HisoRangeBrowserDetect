@@ -1,5 +1,4 @@
 <?php
-
 namespace hisorange\BrowserDetect\Test;
 
 use hisorange\BrowserDetect\Payload;
@@ -36,5 +35,7 @@ class PayloadTest extends TestCase
             'a'         => 'b',
             'userAgent' => 'test',
         ], $payload->toArray());
+
+        $this->assertNull($payload->getValue('non'));
     }
 }

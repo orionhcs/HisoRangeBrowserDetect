@@ -3,66 +3,81 @@
 namespace hisorange\BrowserDetect;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 /**
- * Class ServiceProvider
+ * Registers the package as a service provider,
+ * also injects the blade directives.
+ *
  * @package hisorange\BrowserDetect
  */
-class ServiceProvider extends \Illuminate\Support\ServiceProvider
+class ServiceProvider extends BaseServiceProvider
 {
     /**
-     * @inheritdoc
-     */
-    public function isDeferred()
-    {
-        return true;
-    }
-
-    /**
      * Register the custom blade directives.
+     *
+     * @inheritDoc
+     *
+     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerDirectives();
+
+        $source = realpath($raw = __DIR__ . '/../config/browser-detect.php') ?: $raw;
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                $source => config_path('browser-detect.php'),
+            ]);
+        }
+
+        $this->mergeConfigFrom($source, 'browser-detect');
     }
 
     /**
      * Register the blade directives.
      */
-    protected function registerDirectives()
+    protected function registerDirectives(): void
     {
-        if (version_compare($this->app->version(), '5.5', '>=')) {
-            // Workaround to support the PHP5.6 syntax.
-            // Even tho the laravel version will lock to 7.0 >=
-            // but the code is still complied and throws syntax error on 5.6.
-            $blade = Blade::getFacadeRoot();
-            $if    = 'if';
-
-            foreach (['desktop', 'tablet', 'mobile'] as $key) {
-                $blade->$if($key, function () use ($key) {
-                    return app()->make('browser-detect')->detect()->offsetGet('is' . ucfirst($key));
-                });
+        Blade::if(
+            'desktop',
+            function () {
+                return app()->make('browser-detect')->detect()->isDesktop();
             }
+        );
 
-            $blade->$if('browser', function ($key) {
-                return app()->make('browser-detect')->detect()->offsetGet($key);
-            });
-        }
+        Blade::if(
+            'tablet',
+            function () {
+                return app()->make('browser-detect')->detect()->isTablet();
+            }
+        );
+
+        Blade::if(
+            'mobile',
+            function () {
+                return app()->make('browser-detect')->detect()->isMobile();
+            }
+        );
+
+        Blade::if(
+            'browser',
+            function ($fn) {
+                return app()->make('browser-detect')->detect()->$fn();
+            }
+        );
     }
 
     /**
+     * Only binding can occure here!
+     *
      * @inheritdoc
      */
-    public function register()
+    public function register(): void
     {
-        $this->app->singleton('browser-detect', Parser::class);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function provides()
-    {
-        return ['browser-detect'];
+        $this->app->singleton('browser-detect', function ($app) {
+            return new Parser($app->make('cache'), $app->make('request'), $app->make('config')['browser-detect'] ?? []);
+        });
     }
 }
